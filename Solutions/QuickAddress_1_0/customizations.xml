@@ -1,0 +1,26 @@
+<ImportExportXml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <Entities></Entities>
+  <Roles></Roles>
+  <Workflows></Workflows>
+  <FieldSecurityProfiles></FieldSecurityProfiles>
+  <Templates />
+  <EntityMaps />
+  <EntityRelationships />
+  <OrganizationSettings />
+  <optionsets />
+  <WebResources>
+    <WebResource>
+      <WebResourceId>{0196a6af-3528-e311-8c43-000c294ba923}</WebResourceId>
+      <Name>unizap_QuickAddress.htm</Name>
+      <DisplayName>QuickAddress.htm</DisplayName>
+      <WebResourceType>1</WebResourceType>
+      <IsCustomizable>1</IsCustomizable>
+      <CanBeDeleted>1</CanBeDeleted>
+      <IsHidden>0</IsHidden>
+      <FileName>/WebResources/unizap_QuickAddresshtm0196A6AF-3528-E311-8C43-000C294BA923</FileName>
+    </WebResource>
+  </WebResources>
+  <Languages>
+    <Language>1033</Language>
+  </Languages>
+</ImportExportXml>

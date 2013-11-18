@@ -1,0 +1,143 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>Quick Address</title>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+    <meta charset="utf-8">
+    <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false&libraries=places"> </script>
+    <style>
+        input
+        {
+            border: 1px solid rgba(0, 0, 0, 0.5);
+        }
+        input.notfound
+        {
+            border: 2px solid rgba(255, 0, 0, 0.4);
+        }
+    </style>
+    <script type="text/javascript">
+        var XrmObject = window.parent.Xrm;
+        var addressInfo;
+
+        function initialize() {
+
+            var input = /** @type {HTMLInputElement} */(document.getElementById('searchTextField'));
+            var autocomplete = new google.maps.places.Autocomplete(input);
+
+            var infowindow = new google.maps.InfoWindow();
+
+            google.maps.event.addListener(autocomplete, 'place_changed', function () {
+                infowindow.close();
+                input.className = '';
+                var place = autocomplete.getPlace();
+                if (!place.geometry) {
+                    // Inform the user that the place was not found and return.
+                    input.className = 'notfound';
+                    return;
+                }
+
+                var address = '';
+                addressInfo = new Object();
+                if (place.address_components) {
+                    address = [
+        (place.address_components[0] && place.address_components[0].short_name || ''),
+        (place.address_components[1] && place.address_components[1].short_name || ''),
+        (place.address_components[2] && place.address_components[2].short_name || '')
+      ].join(' ');
+                }
+
+                infowindow.setContent('<div><strong>' + place.name + '</strong><br>' + address);
+
+                setAddressInfo(place);
+            });
+        }
+
+        google.maps.event.addDomListener(window, 'load', initialize);
+
+        function extractAddressComponents(addressComponents) {
+            for (var i = 0; i < addressComponents.length; i++) {
+                for (var j = 0; j < addressComponents[i].types.length; j++) {
+                    switch (addressComponents[i].types[j]) {
+                        case 'street_number':
+                            if (addressInfo.line1)
+                                addressInfo.line1 = addressInfo.line1 + ', ' + addressComponents[i].long_name;
+                            else
+                                addressInfo.line1 = addressComponents[i].long_name;
+                            break;
+                        case 'route':
+                            if (addressInfo.line1)
+                                addressInfo.line1 = addressInfo.line1 + ', ' + addressComponents[i].long_name;
+                            else
+                                addressInfo.line1 = addressComponents[i].long_name;
+                            break;
+                        case 'sublocality':
+                            addressInfo.line2 = addressComponents[i].long_name;
+                            break;
+                        case 'locality':
+                            addressInfo.line3 = addressComponents[i].long_name;
+                            break;
+                        case 'administrative_area_level_2':
+                            addressInfo.city = addressComponents[i].long_name;
+                            break;
+                        case 'administrative_area_level_1':
+                            addressInfo.state = addressComponents[i].long_name;
+                            break;
+                        case 'country':
+                            addressInfo.country = addressComponents[i].long_name;
+                            break;
+                        case 'postal_code':
+                            addressInfo.postalcode = addressComponents[i].long_name;
+                            break;
+                        default:
+                            if (addressInfo.otherinfo)
+                                addressInfo.otherinfo = addressInfo.otherinfo + ' ' + addressComponents[i].long_name;
+                            else
+                                addressInfo.otherinfo = addressComponents[i].long_name;
+                    }
+                }
+            }
+        }
+
+        function setAddressInfo(place) {
+            if (place.address_components) {
+                if (place.international_phone_number)
+                    addressInfo.phone = place.international_phone_number;
+                if (place.website)
+                    addressInfo.website = place.website;
+                if (place.name)
+                    addressInfo.name = place.name;
+                extractAddressComponents(place.address_components);
+
+                //Set Fields
+                setCRMFormFields(addressInfo)
+
+            }
+        }
+
+        function setCRMFormFields(addressInfo) {
+            if (XrmObject.Page.getAttribute('name')) XrmObject.Page.getAttribute('name').setValue(addressInfo.name); //account name
+            if (XrmObject.Page.getAttribute('address1_name')) XrmObject.Page.getAttribute('address1_name').setValue(addressInfo.name);
+            if (XrmObject.Page.getAttribute('address1_line1')) XrmObject.Page.getAttribute('address1_line1').setValue(addressInfo.line1);
+            if (XrmObject.Page.getAttribute('address1_line2')) XrmObject.Page.getAttribute('address1_line2').setValue(addressInfo.line2);
+            if (XrmObject.Page.getAttribute('address1_line3')) XrmObject.Page.getAttribute('address1_line3').setValue(addressInfo.line3);
+            if (XrmObject.Page.getAttribute('address1_city')) XrmObject.Page.getAttribute('address1_city').setValue(addressInfo.city);
+            if (XrmObject.Page.getAttribute('address1_stateorprovince')) XrmObject.Page.getAttribute('address1_stateorprovince').setValue(addressInfo.state);
+            if (XrmObject.Page.getAttribute('address1_country')) XrmObject.Page.getAttribute('address1_country').setValue(addressInfo.country);
+            if (XrmObject.Page.getAttribute('address1_postalcode')) XrmObject.Page.getAttribute('address1_postalcode').setValue(addressInfo.postalcode);
+            if (XrmObject.Page.getAttribute('address1_telephone1')) XrmObject.Page.getAttribute('address1_telephone1').setValue(addressInfo.phone);
+            if (XrmObject.Page.getAttribute('websiteurl')) XrmObject.Page.getAttribute('websiteurl').setValue(addressInfo.website); //account website
+        }
+    </script>
+</head>
+<body>
+    <div id="panel">
+        <table style="width: 100%;">
+            <tr>
+                <td>
+                    <input id="searchTextField" type="text" size="60">
+                </td>
+            </tr>
+        </table>
+    </div>
+</body>
+</html>
